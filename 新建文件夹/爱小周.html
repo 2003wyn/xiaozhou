@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表白页面</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: Arial, sans-serif;
+        }
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            z-index: 10;
+        }
+        .overlay h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        .overlay p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .overlay button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .spongebob {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            animation: float 2s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-20px);
+            }
+        }
+        #musicControl {
+            cursor: pointer;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+        }
+        #musicImage {
+            transition: transform 0.5s ease-in-out;
+        }
+        .rotate {
+            animation: rotateMusic 2s linear infinite;
+        }
+        @keyframes rotateMusic {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireworks"></canvas>
+    <div class="overlay">
+        <h1>亲爱的，我想对你说</h1>
+        <p>你是我生命中最美好的奇迹，我愿意用余生守护你。</p>
+        <button id="acceptButton">我愿意</button>
+    </div>
+    <img src="spongebob.gif" alt="SpongeBob" class="spongebob">
+    <div id="musicControl">
+        <img id="musicImage" src="musicOn.png" alt="音乐开启">
+    </div>
+    <audio id="audio" controls autoplay loop>
+        <source src="love.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.radius = Math.random() * 2 + 1;
+                this.velocityX = (Math.random() - 0.5) * 8;
+                this.velocityY = (Math.random() - 0.5) * 8;
+                this.alpha = 1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                this.alpha -= 0.02;
+            }
+        }
+
+        function randomColor() {
+            const colors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#8f00ff'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        let particles = [];
+
+        function createFirework(x, y) {
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle(x, y, randomColor()));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles = particles.filter(p => p.alpha > 0);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('acceptButton').addEventListener('click', function() {
+            createFirework(canvas.width / 2, canvas.height / 2);
+            alert('谢谢你的接受，我会好好珍惜！');
+        });
+
+        canvas.addEventListener('click', (e) => {
+            createFirework(e.clientX, e.clientY);
+        });
+
+        animate();
+
+        var audio = document.getElementById("audio");
+        var musicImage = document.getElementById("musicImage");
+        var isPlaying = true;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                musicImage.src = "musicOff.png";
+                musicImage.classList.remove("rotate");
+            } else {
+                audio.play();
+                musicImage.src = "musicOn.png";
+                musicImage.classList.add("rotate");
+            }
+            isPlaying = !isPlaying;
+        }
+
+        audio.addEventListener("pause", function() {
+            musicImage.classList.remove("rotate");
+        });
+
+        document.getElementById("musicControl").addEventListener("click", toggleMusic);
+
+        window.addEventListener("load", function() {
+            audio.play();
+            musicImage.classList.add("rotate");
+            audio.style.position = 'absolute';
+            audio.style.left = '-9999px';
+            audio.style.top = '-9999px';
+        });
+    </script>
+</body>
+</html>
